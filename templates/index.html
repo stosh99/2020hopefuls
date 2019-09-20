@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+    <script src="https://code.jquery.com/jquery-1.12.4.js" type="text/javascript"></script>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+    <title>2020 Candidates</title>
+  </head>
+
+  <script type="text/javascript">
+        function get_grid() {
+            let candString = '<img src="/_graph_grid.png" alt="candidate plot">';
+             $('#gridGraph').html(candString);
+        }
+        //function get_grid() {
+        //    $.ajax({
+        //        type: "GET",
+        //        url: "/_graph_grid.png",
+        //        success: function (data) {
+        //             let graph_data = data
+        //             $("#gridGraph").html(graph_data);
+        //             //$("#graph").show();
+        //             //$("#update").html(cur_date)
+        //              },
+//
+        //         dataType: "html"
+         //    });
+        //};
+        $(document).ready(get_grid);
+        $(document).ready(setInterval(get_grid, 30*1000))
+
+  </script>
+
+  <body>
+
+  <h1>2020 Hopefuls</h1>
+
+
+    <p>
+        <div id="gridGraph">graph loading...</div>
+    </p>
+  </body>
+</html>
