@@ -17,7 +17,7 @@ class Database:
         self.engine = sqlalchemy.create_engine(self.SQLALCHEMY_DATABASE_URI)
 
     def get_chicago_time(self):
-        utcmoment_naive = datetime.utcnow()
+        utcmoment_naive = dt.utcnow()
         utcmoment = utcmoment_naive.replace(tzinfo=pytz.utc)
         tz = ['America/Chicago']
         return utcmoment.astimezone(pytz.timezone(tz))
