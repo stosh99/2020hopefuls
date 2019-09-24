@@ -17,10 +17,11 @@ from bokeh.models.glyphs import ImageURL
 from bokeh.layouts import column
 from bokeh.palettes import brewer
 
-import sqlalchemy
-
 app = Flask(__name__)
 
+db = Database()
+
+N_DATAPOINTS = 20
 DEFAULT_VARIABLE = 'All'
 
 
