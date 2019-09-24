@@ -6,7 +6,7 @@ db = Database()
 
 while True:
     df, last_update = db.get_grid_data()
-    df['dt'] = dt.now()
+    df['dt'] = db.get_chicago_time()
     db.dump_grid_data(df)
     print(df)
     time.sleep(5)

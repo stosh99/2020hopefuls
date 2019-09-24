@@ -7,7 +7,6 @@ import re
 import pandas as pd
 import sqlalchemy
 from datetime import datetime
-import tzlocal
 import pytz
 
 ACCESS_TOKEN = "1628411605-V9MhTFQBUjDfHDpPiggFjNvvKPCk5DLfIEYARXz"
@@ -126,8 +125,6 @@ class listener(StreamListener):
 
             print(insert_tuple[10])
             print('*****')
-            with open(self.jsonfile, 'a') as outfile:
-                json.dump(tweet_data, outfile, sort_keys=True, indent=4)
 
             query = "INSERT INTO tweets " \
                     "(id, dt_utc, dt, created_at, user_id, coord, user_loc, hashtags, state, place, text, q_text, " \

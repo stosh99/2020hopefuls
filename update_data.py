@@ -1,4 +1,3 @@
-import json
 from textblob import TextBlob
 import pandas as pd
 from models import Database
