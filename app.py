@@ -21,11 +21,6 @@ import sqlalchemy
 
 app = Flask(__name__)
 
-engine = sqlalchemy.create_engine('mysql+mysqlconnector://demouser:Anna0723$@127.0.0.1/tweets')
-
-db = Database()
-
-N_DATAPOINTS = 20
 DEFAULT_VARIABLE = 'All'
 
 

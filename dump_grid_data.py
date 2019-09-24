@@ -9,5 +9,5 @@ while True:
     df['dt'] = dt.now()
     db.dump_grid_data(df)
     print(df)
-    time.sleep(10)
+    time.sleep(5)
 

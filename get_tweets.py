@@ -26,9 +26,6 @@ df_states = pd.read_csv('static/states.csv')
 class listener(StreamListener):
 
     def __init__(self):
-        self.filename = 'static/2019-07-05.csv'
-        self.jsonfile = 'static/2019-07-05-json.txt'
-        #self.engine = sqlalchemy.create_engine('mysql+mysqlconnector://demouser:Anna0723$@127.0.0.1/tweets')
         self.SQLALCHEMY_DATABASE_URI = "mysql+mysqlconnector://{username}:{password}@{hostname}/{databasename}".format(
             username="admin",
             password="admin999",
@@ -94,7 +91,7 @@ class listener(StreamListener):
             dt_string = created_at.split(' ')[-1] + '-' + created_at.split(' ')[1] + '-' + \
                         created_at.split(' ')[2] + ' ' + created_at.split(' ')[3]
             dt_utc = datetime.strptime(dt_string, '%Y-%b-%d %H:%M:%S')
-            dt_chi = dt_utc.replace(tzinfo=pytz.utc).astimezone(tzlocal.get_localzone())
+            dt_chi = dt_utc.astimezone(pytz.timezone('America/Chicago'))
 
             insert_tuple = (id, dt_utc, dt_chi, created_at, user_id, coord, user_loc, hashtags, state, place,
                             text, q_text, retweet_text, full_text, 0)
@@ -128,11 +125,6 @@ class listener(StreamListener):
                 save_this += ',' + ''
 
             print(insert_tuple[10])
-
-            saveFile = open(self.filename, 'a')
-            saveFile.write(save_this)
-            saveFile.write('\n')
-            saveFile.close()
             print('*****')
             with open(self.jsonfile, 'a') as outfile:
                 json.dump(tweet_data, outfile, sort_keys=True, indent=4)
