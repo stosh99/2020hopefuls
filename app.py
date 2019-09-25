@@ -41,7 +41,7 @@ def map(candidate):
     max_sent, min_sent = db.get_scaled_sent()
 
     #shapefile = 'static/shapefiles/USshapefile/USshapefile.shp'
-    shapefile = '/var/www/static/shapefiles/USshapefile/USshapefile.shp'
+    shapefile = '/var/www/2020hopefuls/static/shapefiles/USshapefile/USshapefile.shp'
     gdf = gpd.read_file(shapefile)
     df_states = db.get_states()
     gdf = gdf.merge(df_states, left_on='NAME', right_on='state')
