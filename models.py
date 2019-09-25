@@ -16,12 +16,6 @@ class Database:
         )
         self.engine = sqlalchemy.create_engine(self.SQLALCHEMY_DATABASE_URI)
 
-    def get_chicago_time(self):
-        utcmoment_naive = dt.utcnow()
-        utcmoment = utcmoment_naive.replace(tzinfo=pytz.utc)
-        tz = ['America/Chicago']
-        return utcmoment.astimezone(pytz.timezone(tz))
-
     def get_data(self):
         qry = 'SELECT * FROM tweets WHERE updated = 0'
         con = self.engine.connect()
@@ -70,7 +64,7 @@ class Database:
         candidates = pd.read_sql('candidates', con=con)['candidate']
         states = pd.read_sql('states', con=con)['abbr']
         con.close()
-        date_today = dt.strftime(self.get_chicago_time(), '%Y-%m-%d')
+        date_today = dt.strftime(get_chicago_time(), '%Y-%m-%d')
         last_update = df_cand['dt'].max()
 
         df_filter = filter_sent(df_cand, sent_limit)
@@ -91,7 +85,7 @@ class Database:
         df_cand = pd.DataFrame(vals.fetchall())
         df_cand.columns = vals.keys()
         con.close()
-        date_today = dt.strftime(self.get_chicago_time(), '%Y-%m-%d')
+        date_today = dt.strftime(get_chicago_time(), '%Y-%m-%d')
         last_update = df_cand['dt'].max()
 
         df_filter = filter_sent(df_cand, sent_limit)
@@ -198,6 +192,13 @@ def get_plot_df(df_master, candidate='All'):
 def get_scaled_sent():
     qry = "SELECT MAX(sent)as max_sent, MIN(sent) as min_sent " \
           "FROM tweets WHERE updated=1 and DAY(dt) = (SELECT MAX(DAY(dt)) FROM tweets)"
+
+
+def get_chicago_time():
+    utcmoment_naive = dt.utcnow()
+    utcmoment = utcmoment_naive.replace(tzinfo=pytz.utc)
+    tz = 'America/Chicago'
+    return utcmoment.astimezone(pytz.timezone(tz))
 
 
 
