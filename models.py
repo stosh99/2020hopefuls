@@ -17,7 +17,7 @@ class Database:
         self.engine = sqlalchemy.create_engine(self.SQLALCHEMY_DATABASE_URI)
 
     def get_data(self):
-        qry = 'SELECT * FROM tweets WHERE updated = 0'
+        qry = 'SELECT * FROM tweets WHERE updated = 0 LIMIT 5000'
         con = self.engine.connect()
         vals = con.execute(qry)
         df = pd.DataFrame(vals.fetchall())
@@ -38,6 +38,7 @@ class Database:
                         row.Yang, row.empty, row.id)
         con = self.engine.connect()
         con.execute(qry, update_tuple)
+        con.close()
 
     def get_candidate_data_2(self, candidate, sent_limit):
         con = self.engine.connect()
@@ -76,9 +77,9 @@ class Database:
 
     def get_candidate_data(self, candidate, sent_limit):
         if candidate == 'All':
-            qry = "SELECT * FROM tweets WHERE updated=1 and DATE(dt) = (SELECT MAX(DATE(dt)) FROM tweets)"
+            qry = "SELECT * FROM tweets WHERE DATE(dt) = (SELECT MAX(DATE(dt)) FROM tweets)"
         else:
-            qry = "SELECT * FROM tweets WHERE updated=1 and DATE(dt) = (SELECT MAX(DAtE(dt)) FROM tweets)" \
+            qry = "SELECT * FROM tweets WHERE DATE(dt) = (SELECT MAX(DAtE(dt)) FROM tweets)" \
                   + " and " + candidate + "=1"
         con = self.engine.connect()
         vals = con.execute(qry)

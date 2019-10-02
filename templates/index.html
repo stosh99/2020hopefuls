@@ -1,44 +1,63 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <meta http-equiv="content-type" content="text/html; charset=utf-8">
-    <script src="https://code.jquery.com/jquery-1.12.4.js" type="text/javascript"></script>
-    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
-    <title>2020 Candidates</title>
-  </head>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <script type="text/javascript">
+            function round(n){n=parseFloat(n);return isNaN(n)?false:n.toFixed(2);}
+        </script>
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css"
+              integrity="sha512-dTfge/zgoMYpP7QbHy4gWMEGsbsdZeCXz7irItjcC3sPUFtf0kuFbDz/ixG7ArTxmDjLXDmezHubeNikyKGVyQ=="
+              crossorigin="anonymous">
+        <LINK href="/static/css/style.css?rand=1sdae41" rel="stylesheet" type="text/css">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+        <script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/jquery-ui.js"></script>
+        <title>2020 Hopefuls</title>
+    </head>
 
-  <script type="text/javascript">
-        function get_grid() {
-            let candString = '<img src="/_graph_grid.png" alt="candidate plot">';
-             $('#gridGraph').html(candString);
-        }
-        //function get_grid() {
-        //    $.ajax({
-        //        type: "GET",
-        //        url: "/_graph_grid.png",
-        //        success: function (data) {
-        //             let graph_data = data
-        //             $("#gridGraph").html(graph_data);
-        //             //$("#graph").show();
-        //             //$("#update").html(cur_date)
-        //              },
-//
-        //         dataType: "html"
-         //    });
-        //};
-        $(document).ready(get_grid);
-        $(document).ready(setInterval(get_grid, 30*1000))
+    <body>
+        <nav class="navbar navbar">
+          <div class="container">
+            <div class="navbar-header">
+              <a class="navbar-brand" style="font-weight:bold; font-size:48" href="/">2020 Hopefuls   <h5 style="font-weight:bold"></h5></a>
+            </div>
+            <div class="btn-group">
+                <button type="button" data-toggle="dropdown" class="btn btn-primary btn-lg dropdown-toggle" style="margin-top: 5px;">Grid</button>
+                <ul class="dropdown-menu">
+                    <li><a href="/overview/Awobs">Overview</a></li>
+                    <li><a href="/teamstat/Awobs">Players</a></li>
+                    <li><a href="/eligibility/Awobs">Eligibility</a></li>
+                    <li><a href="/transactions/Awobs">Transactions</a></li>
+                </ul>
+            </div>
+             <div class="btn-group">
+                <button type="button" data-toggle="dropdown" class="btn btn-primary btn-lg dropdown-toggle" style="margin-top: 5px;">Map</button>
+                <ul class="dropdown-menu">
+                    <li><a href="/overview/Big Units">Overview</a></li>
+                    <li><a href="/teamstat/Big Units">Players</a></li>
+                    <li><a href="/eligibility/Big Units">Eligibility</a></li>
+                    <li><a href="/transactions/Big Units">Transactions</a></li>
+                </ul>
+            </div>
+            <div class="btn-group">
+                <button type="button" data-toggle="dropdown" class="btn btn-primary btn-lg dropdown-toggle" style="margin-top: 5px;">About</button>
+                <ul class="dropdown-menu">
+                    <li><a href="/overview/Doorights">Overview</a></li>
+                    <li><a href="/teamstat/Doorights">Players</a></li>
+                    <li><a href="/eligibility/Doorights">Eligibility</a></li>
+                    <li><a href="/transactions/Doorights">Transactions</a></li>
+                </ul>
+            </div>
+          </div>
+        </nav>
 
-  </script>
 
-  <body>
+        <div class="container">
+            {% block body %}{% endblock %}
+        </div>
 
-  <h1>2020 Hopefuls</h1>
+    </body>
 
-
-    <p>
-        <div id="gridGraph">graph loading...</div>
-    </p>
-  </body>
 </html>
