@@ -31,8 +31,8 @@ SQLALCHEMY_DATABASE_URI = "mysql+mysqlconnector://{username}:{password}@{hostnam
             databasename="2020hopefuls",
         )
 
-engine = sqlalchemy.create_engine('mysql+mysqlconnector://demouser:Anna0723$@127.0.0.1/tweets')
-#engine = sqlalchemy.create_engine(SQLALCHEMY_DATABASE_URI)
+#engine = sqlalchemy.create_engine('mysql+mysqlconnector://demouser:Anna0723$@127.0.0.1/tweets')
+engine = sqlalchemy.create_engine(SQLALCHEMY_DATABASE_URI)
 
 
 def tweet_processing_thread():
