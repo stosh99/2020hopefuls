@@ -3,7 +3,7 @@
 
 {% block body %}
       <script>
-    setInterval("location.reload(true);",30000);
+    setTimeout("location.reload(true);",30000);
     function gotoSection(cand) {
         alert(cand.value);
         window.location.assign( '/map/' + cand );
