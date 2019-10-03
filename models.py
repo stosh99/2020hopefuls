@@ -7,7 +7,8 @@ import pytz
 
 class Database:
     def __init__(self):
-        #self.engine = sqlalchemy.create_engine('mysql+mysqlconnector://demouser:Anna0723$@127.0.0.1/tweets')
+        self.engine = sqlalchemy.create_engine('mysql+mysqlconnector://demouser:Anna0723$@127.0.0.1/tweets')
+        """
         self.SQLALCHEMY_DATABASE_URI = "mysql+mysqlconnector://{username}:{password}@{hostname}/{databasename}".format(
             username="admin",
             password="admin999",
@@ -15,7 +16,7 @@ class Database:
             databasename="2020hopefuls",
         )
         self.engine = sqlalchemy.create_engine(self.SQLALCHEMY_DATABASE_URI)
-
+        """
     def get_data(self):
         qry = 'SELECT * FROM tweets WHERE updated = 0 LIMIT 5000'
         con = self.engine.connect()

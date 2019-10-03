@@ -9,5 +9,5 @@ while True:
     df['dt'] = get_chicago_time()
     db.dump_grid_data(df)
     print(df)
-    time.sleep(5)
+    time.sleep(120)
 

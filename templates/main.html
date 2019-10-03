@@ -1,0 +1,19 @@
+{% extends "index.html" %}
+
+
+{% block body %}
+      <script>
+    setInterval("location.reload(true);",30000);
+    function gotoSection(cand) {
+        alert(cand.value);
+        window.location.assign( '/map/' + cand );
+    };
+  </script>
+    <h4>Last update: {{ last_update }} central time </h4>
+  <div id="plotdiv">
+    {{ js_resources|indent(4)|safe }}
+    {{ css_resources|indent(4)|safe }}
+    {{ plot_script|indent(4)|safe }}
+    {{ plot_div|indent(4)|safe }}
+  </div>
+{% endblock %}

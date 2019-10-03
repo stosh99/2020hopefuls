@@ -10,6 +10,7 @@ from datetime import datetime
 import pytz
 import queue
 import threading
+from textblob import TextBlob
 
 ACCESS_TOKEN = "1628411605-V9MhTFQBUjDfHDpPiggFjNvvKPCk5DLfIEYARXz"
 ACCESS_TOKEN_SECRET = "u9fBDP1lyptx2mfmZUK4uaqzrC6PlwGNQtdQFszLdXGu0"
@@ -30,8 +31,8 @@ SQLALCHEMY_DATABASE_URI = "mysql+mysqlconnector://{username}:{password}@{hostnam
             databasename="2020hopefuls",
         )
 
-#engine = sqlalchemy.create_engine('mysql+mysqlconnector://demouser:Anna0723$@127.0.0.1/tweets')
-engine = sqlalchemy.create_engine(SQLALCHEMY_DATABASE_URI)
+engine = sqlalchemy.create_engine('mysql+mysqlconnector://demouser:Anna0723$@127.0.0.1/tweets')
+#engine = sqlalchemy.create_engine(SQLALCHEMY_DATABASE_URI)
 
 
 def tweet_processing_thread():
@@ -42,29 +43,165 @@ def tweet_processing_thread():
         tweet_queue.task_done()
 
 
-def process_tweet(item):
-    query = "INSERT INTO tweets2 " \
-            "(id, dt_utc, dt, created_at, user_id, coord, user_loc, hashtags, state, place, text, q_text, " \
-            "retweet_text, full_text, updated) " \
-            "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
-    con = engine.connect()
-    #con.execute(query, item)
-    item_list = list(item)
-    item_list[1] = datetime.strftime(item[1], "%Y-%m-%d %H:%M:%S")
-    item_list[2] = datetime.strftime(item[2], "%Y-%m-%d %H:%M:%S")
-    if item_list[5] is None:
-        item_list[5] = 'None'
-    print(item[10])
+def process_tweet(tweet):
+    tweet_dict = get_candidates(tweet)
+    tweet_dict['dt_utc'] = datetime.strftime(tweet_dict['dt_utc'], "%Y-%m-%d %H:%M:%S")
+    tweet_dict['dt'] = datetime.strftime(tweet_dict['dt'], "%Y-%m-%d %H:%M:%S")
+    tweet_dict['created_at'] = datetime.strftime(tweet_dict['created_at'], "%Y-%m-%d %H:%M:%S")
+    tweet_dict['sent'] = calc_sentiment(tweet_dict['text'], tweet_dict['full_text'], tweet_dict['q_text'])
+    if tweet_dict['coord'] is None:
+        tweet_dict['coord'] = 'None'
+    print(tweet_dict['sent'], tweet_dict['text'])
     print("^^^^^^^^^^^^")
-    cols = ['id', 'dt_utc', 'dt', 'created_at', 'user_id', 'coord', 'user_loc', 'hashtags', 'state', 'place', 'text',
-            'q_text', 'retweet_text', 'full_text', 'updated']
-    df_tweet = pd.DataFrame(data=[item_list], columns=cols, index=None)
+    df_tweet = pd.DataFrame(data=[tweet_dict], columns=tweet_dict.keys(), index=None)
+    con = engine.connect()
     try:
-        df_tweet.to_sql('tweets2', con=con, if_exists='append')
+        df_tweet.to_sql('tweets', con=con, if_exists='append')
     except:
+        print('fail')
         pass
     con.close()
 
+
+def calc_sentiment(text, full_text, q_text):
+    sent = 0
+    count = 1
+    if len(full_text) > 5:
+        sent += TextBlob(full_text).sentiment.polarity
+    elif len(text) > 5:
+        sent += TextBlob(text).sentiment.polarity
+        count += 1
+    if len(full_text) > 5:
+        sent = TextBlob(q_text).sentiment.polarity
+        count += 1
+    avg_sent = sent / count
+    return avg_sent
+
+
+def get_candidates(row):
+    text = row['text']
+    q_text = row['q_text']
+    if row['q_text'] == '' or pd.isnull(row['q_text']):
+        q_text = ''
+    if row['q_text'] == '' or pd.isnull(row['text']):
+        if row['full_text'] == '' or pd.isnull(row['text']):
+            text = ''
+        else:
+            text = row['full_text']
+
+    row['empty'] = 0
+    if ('bennet' in text.lower()) or ('bennet' in q_text.lower()):
+        row['Bennet'] = 1
+        row['empty'] = 1
+    else:
+        row['Bennet'] = 0
+    if ('biden' in text.lower()) or ('biden' in q_text.lower()):
+        row['Biden'] = 1
+        row['empty'] = 1
+    else:
+        row['Biden'] = 0
+    if ('blasio' in text.lower()) or ('blasio' in q_text.lower()):
+        row['Blasio'] = 1
+        row['empty'] = 1
+    else:
+        row['Blasio'] = 0
+    if ('booker' in text.lower()) or ('booker' in q_text.lower()):
+        row['Booker'] = 1
+        row['empty'] = 1
+    else:
+        row['Booker'] = 0
+    if ('buttigieg' in text.lower()) or ('mayor pete' in text.lower()) or ('buttigieg' in q_text.lower()) or (
+            'mayor pete' in q_text.lower()):
+        row['Buttigieg'] = 1
+        row['empty'] = 1
+    else:
+        row['Buttigieg'] = 0
+    if ('castro' in text.lower()) or ('castro' in q_text.lower()):
+        row['Castro'] = 1
+        row['empty'] = 1
+    else:
+        row['Castro'] = 0
+    if ('delaney' in text.lower()) or ('delaney' in q_text.lower()):
+        row['Delaney'] = 1
+        row['empty'] = 1
+    else:
+        row['Delaney'] = 0
+    if ('tulsi' in text.lower()) or ('gabbard' in text.lower()) or ('tulsi' in q_text.lower()) or (
+            'gabbard' in q_text.lower()):
+        row['Gabbard'] = 1
+        row['empty'] = 1
+    else:
+        row['Gabbard'] = 0
+    if ('gillibrand' in text.lower()) or ('gillibrand' in q_text.lower()):
+        row['Gillibrand'] = 1
+        row['empty'] = 1
+    else:
+        row['Gillibrand'] = 0
+    if ('kamala' in text.lower()) or ('harris' in text.lower()) or ('kamala' in q_text.lower()) or (
+            'harris' in q_text.lower()):
+        row['Harris'] = 1
+        row['empty'] = 1
+    else:
+        row['Harris'] = 0
+    if ('hickenlooper' in text.lower()) or ('hickenlooper' in q_text.lower()):
+        row['Hickenlooper'] = 1
+        row['empty'] = 1
+    else:
+        row['Hickenlooper'] = 0
+    if ('inslee' in text.lower()) or ('inslee' in q_text.lower()):
+        row['Inslee'] = 1
+        row['empty'] = 1
+    else:
+        row['Inslee'] = 0
+    if ('klobuchar' in text.lower()) or ('klobuchar' in q_text.lower()):
+        row['Klobuchar'] = 1
+        row['empty'] = 1
+    else:
+        row['Klobuchar'] = 0
+    if ('beto' in text.lower()) or ('orourke' in text.lower()) or ("o'rourke" in text.lower()) or (
+            'beto' in q_text.lower()) or ('orourke' in q_text.lower()) or ("o'rourke" in q_text.lower()):
+        row['ORourke'] = 1
+        row['empty'] = 1
+    else:
+        row['ORourke'] = 0
+    if ('ryan' in text.lower()) or ('ryan' in q_text.lower()):
+        row['Ryan'] = 1
+        row['empty'] = 1
+    else:
+        row['Ryan'] = 0
+    if ('bernie' in text.lower()) or ('sanders' in text.lower()) or ('bernie' in q_text.lower()) or (
+            'sanders' in q_text.lower()):
+        row['Sanders'] = 1
+        row['empty'] = 1
+    else:
+        row['Sanders'] = 0
+    if ('swalwell' in text.lower()) or ('swalwell' in q_text.lower()):
+        row['Swalwell'] = 1
+        row['empty'] = 1
+    else:
+        row['Swalwell'] = 0
+    if ('tulsi' in text.lower()) or ('tulsi' in q_text.lower()):
+        row['Tulsi'] = 1
+        row['empty'] = 1
+    else:
+        row['Tulsi'] = 0
+    if ('warren' in text.lower()) or ('warren' in q_text.lower()):
+        row['Warren'] = 1
+        row['empty'] = 1
+    else:
+        row['Warren'] = 0
+    if ('williamson' in text.lower()) or ('williamson' in q_text.lower()):
+        row['Williamson'] = 1
+        row['empty'] = 1
+    else:
+        row['Williamson'] = 0
+    if ('yang' in text.lower()) or ('yang' in q_text.lower()):
+        row['Yang'] = 1
+        row['empty'] = 1
+    else:
+        row['Yang'] = 0
+    row['updated'] = 1
+    return row
 
 
 tweet_queue = queue.Queue()
@@ -76,15 +213,6 @@ thread.start()
 class listener(StreamListener):
 
     def __init__(self):
-        """
-        self.SQLALCHEMY_DATABASE_URI = "mysql+mysqlconnector://{username}:{password}@{hostname}/{databasename}".format(
-            username="admin",
-            password="admin999",
-            hostname="bu2019.cgh9oe6xgzbv.us-east-1.rds.amazonaws.com",
-            databasename="2020hopefuls",
-        )
-        self.engine = sqlalchemy.create_engine(self.SQLALCHEMY_DATABASE_URI)
-        """
         pass
 
     def build_file(self, save_this, field):
@@ -145,9 +273,12 @@ class listener(StreamListener):
                         created_at.split(' ')[2] + ' ' + created_at.split(' ')[3]
             dt_utc = datetime.strptime(dt_string, '%Y-%b-%d %H:%M:%S')
             dt_chi = dt_utc.astimezone(pytz.timezone('America/Chicago'))
+            created_at = dt_utc.astimezone(pytz.timezone('America/Chicago'))
 
-            insert_tuple = (id, dt_utc, dt_chi, created_at, user_id, coord, user_loc, hashtags, state, place,
-                            text, q_text, retweet_text, full_text, 0)
+            insert_dict = {'id': id, 'dt_utc': dt_utc, 'dt': dt_chi, 'created_at': created_at, 'user_id': user_id,
+                           'coord': coord, 'user_loc': user_loc, 'hashtags': hashtags, 'state': state, 'place': place,
+                           'text': text, 'q_text': q_text, 'retweet_text': retweet_text, 'full_text': full_text,
+                           'updated': 0}
 
             save_this = str(tweet_data['id'])
             save_this = self.build_file(save_this, str(tweet_data['created_at']))
@@ -177,25 +308,9 @@ class listener(StreamListener):
             else:
                 save_this += ',' + ''
 
-            #print(insert_tuple[10])
-            #print('*****')
-
-            """
-            query = "INSERT INTO tweets " \
-                    "(id, dt_utc, dt, created_at, user_id, coord, user_loc, hashtags, state, place, text, q_text, " \
-                    "retweet_text, full_text, updated) " \
-                    "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
-            con = self.engine.connect()
-            con.execute(query, insert_tuple)
-            con.close()
-            """
-
-            tweet_queue.put(insert_tuple)
-
+            tweet_queue.put(insert_dict)
         except:
             pass
-
-
         return True
 
     def on_timeout(self):

@@ -27,7 +27,59 @@ DEFAULT_VARIABLE = 'All'
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    df, last_update = db.get_grid_data_db()
+    df['jpeg'] = 'static/images/' + df['jpeg']
+    max_sent = abs(df['avg_sent']).max()
+    df['avg_sent'] = df['avg_sent'] / max_sent
+
+    xdr = Range1d(start=-0, end=df['user_count'].max() + 1000)
+    ydr = Range1d(start=-1.2, end=1.2)
+
+    source = ColumnDataSource(df)
+    p = figure(plot_height=600, plot_width=800, x_range=xdr, y_range=ydr, toolbar_location=None)
+    p.circle(x="user_count", y="avg_sent", size=50, source=source, alpha=.05)
+    image = ImageURL(url="jpeg", x="user_count", y="avg_sent", w=None, h=None, anchor="center", global_alpha=.75)
+    p.add_glyph(source, image)
+    p.add_tools(HoverTool(
+        tooltips=[
+            ("Candidate", "@fullname"),
+            ("Sentiment", "@avg_sent"),
+            ("#Tweeters", "@user_count"),
+        ]))
+
+    xaxis = LinearAxis()
+    p.xaxis.fixed_location = 0
+    p.xaxis.axis_line_width = 2
+    p.xaxis.axis_label = 'Number of Tweeters'
+    p.xaxis.axis_label_text_font_style = 'bold'
+    p.xaxis.axis_label_text_font_size = '12pt'
+    p.xaxis.major_label_text_font_style = 'bold'
+    p.xaxis.major_label_text_font_size = '12pt'
+
+    yaxis = LinearAxis()
+    p.yaxis.axis_line_width = 2
+    p.yaxis.axis_label = 'Sentiment'
+    p.yaxis.axis_label_text_font_style = 'bold'
+    p.yaxis.axis_label_text_font_size = '12pt'
+    p.yaxis.major_label_text_font_style = 'bold'
+    p.yaxis.major_label_text_font_size = '12pt'
+
+    p.add_layout(Grid(dimension=0, ticker=xaxis.ticker))
+    p.add_layout(Grid(dimension=1, ticker=yaxis.ticker))
+
+    js_resources = INLINE.render_js()
+    css_resources = INLINE.render_css()
+    layout = column(p)
+    script, div = components(layout)
+    html = render_template(
+        'main.html',
+        plot_script=script,
+        plot_div=div,
+        js_resources=js_resources,
+        css_resources=css_resources,
+        last_update=last_update,
+    )
+    return encode_utf8(html)
 
 
 @app.route('/map/<candidate>', methods=['GET', 'POST'])
