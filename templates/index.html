@@ -23,35 +23,22 @@
               <a class="navbar-brand" style="font-weight:bold; font-size:48" href="/">2020 Hopefuls   <h5 style="font-weight:bold"></h5></a>
             </div>
             <div class="btn-group">
-                <button type="button" data-toggle="dropdown" class="btn btn-primary btn-lg dropdown-toggle" style="margin-top: 5px;">Grid</button>
-                <ul class="dropdown-menu">
-                    <li><a href="/overview/Awobs">Overview</a></li>
-                    <li><a href="/teamstat/Awobs">Players</a></li>
-                    <li><a href="/eligibility/Awobs">Eligibility</a></li>
-                    <li><a href="/transactions/Awobs">Transactions</a></li>
-                </ul>
+                <!--<button type="button" class="btn btn-primary btn-lg " style="margin-top: 5px;"><a href="/">Grid</a></button>-->
+                <a href="/" class="btn btn-primary btn-lg" role="button">Grid</a>
             </div>
              <div class="btn-group">
                 <button type="button" data-toggle="dropdown" class="btn btn-primary btn-lg dropdown-toggle" style="margin-top: 5px;">Map</button>
                 <ul class="dropdown-menu">
-                    <li><a href="/overview/Big Units">Overview</a></li>
-                    <li><a href="/teamstat/Big Units">Players</a></li>
-                    <li><a href="/eligibility/Big Units">Eligibility</a></li>
-                    <li><a href="/transactions/Big Units">Transactions</a></li>
+                    {% for row in cands %}
+                        <li><a href="/map/{{ row.candidate }}">{{row.fullname}}</a></li>
+                    {% endfor %}
                 </ul>
             </div>
             <div class="btn-group">
-                <button type="button" data-toggle="dropdown" class="btn btn-primary btn-lg dropdown-toggle" style="margin-top: 5px;">About</button>
-                <ul class="dropdown-menu">
-                    <li><a href="/overview/Doorights">Overview</a></li>
-                    <li><a href="/teamstat/Doorights">Players</a></li>
-                    <li><a href="/eligibility/Doorights">Eligibility</a></li>
-                    <li><a href="/transactions/Doorights">Transactions</a></li>
-                </ul>
+                <a href="/about" class="btn btn-primary btn-lg" role="button">About</a>
             </div>
           </div>
         </nav>
-
 
         <div class="container">
             {% block body %}{% endblock %}

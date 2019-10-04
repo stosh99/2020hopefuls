@@ -115,7 +115,7 @@ class Database:
 
     def get_scaled_sent(self):
         qry = "SELECT MAX(sent)as max_sent, MIN(sent) as min_sent " \
-              "FROM tweets WHERE updated=1 and DAY(dt) = (SELECT MAX(DAY(dt)) FROM tweets)"
+              "FROM tweets WHERE updated=1 and DATE(dt) = (SELECT MAX(DATE(dt)) FROM tweets)"
         con = self.engine.connect()
         vals = con.execute(qry).fetchone()
         return vals[0], vals[1]

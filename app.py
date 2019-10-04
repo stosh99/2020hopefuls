@@ -1,4 +1,4 @@
-from flask import Flask, render_template, Response
+from flask import Flask, render_template, Response, g
 from models import Database
 from graphs import get_graph_grid
 import geopandas as gpd
@@ -12,7 +12,7 @@ from bokeh.plotting import figure
 from bokeh.resources import INLINE
 from bokeh.util.string import encode_utf8
 from bokeh.models import GeoJSONDataSource, LinearColorMapper, ColorBar, HoverTool, ColumnDataSource, Range1d, \
-    LinearAxis, Grid
+    LinearAxis, Grid, Label
 from bokeh.models.glyphs import ImageURL
 from bokeh.layouts import column
 from bokeh.palettes import brewer
@@ -31,6 +31,8 @@ def index():
     df['jpeg'] = 'static/images/' + df['jpeg']
     max_sent = abs(df['avg_sent']).max()
     df['avg_sent'] = df['avg_sent'] / max_sent
+
+    cands = db.get_candidates()
 
     xdr = Range1d(start=-0, end=df['user_count'].max() + 1000)
     ydr = Range1d(start=-1.2, end=1.2)
@@ -56,6 +58,9 @@ def index():
     p.xaxis.major_label_text_font_style = 'bold'
     p.xaxis.major_label_text_font_size = '12pt'
 
+    label = Label(x=df['user_count'].max()/2, y=-.2, text='Number of Tweeters', level='glyph', render_mode='canvas',
+                  text_font_style='bold', text_font_size = '12pt')
+
     yaxis = LinearAxis()
     p.yaxis.axis_line_width = 2
     p.yaxis.axis_label = 'Sentiment'
@@ -66,6 +71,7 @@ def index():
 
     p.add_layout(Grid(dimension=0, ticker=xaxis.ticker))
     p.add_layout(Grid(dimension=1, ticker=yaxis.ticker))
+    p.add_layout(label)
 
     js_resources = INLINE.render_js()
     css_resources = INLINE.render_css()
@@ -78,6 +84,7 @@ def index():
         js_resources=js_resources,
         css_resources=css_resources,
         last_update=last_update,
+        cands=cands
     )
     return encode_utf8(html)
 
@@ -208,14 +215,9 @@ def grid():
     return encode_utf8(html)
 
 
-@app.route('/_graph_grid.png')
-def graph_grid():
-    df, last_update = db.get_grid_data_db()
-    print(df)
-    fig = get_graph_grid(df, last_update)
-    output = io.BytesIO()
-    FigureCanvas(fig).print_png(output)
-    return Response(output.getvalue(), mimetype='image/png')
+@app.route('/about')
+def about():
+    return render_template('about.html')
 
 
 if __name__ == '__main__':

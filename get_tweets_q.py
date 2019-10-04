@@ -55,11 +55,11 @@ def process_tweet(tweet):
     print("^^^^^^^^^^^^")
     df_tweet = pd.DataFrame(data=[tweet_dict], columns=tweet_dict.keys(), index=None)
     con = engine.connect()
-    try:
-        df_tweet.to_sql('tweets', con=con, if_exists='append')
-    except:
+    #try:
+    df_tweet.to_sql('tweets', con=con, if_exists='append')
+    """except:
         print('fail')
-        pass
+        pass"""
     con.close()
 
 
