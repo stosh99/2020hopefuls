@@ -1,6 +1,8 @@
 import time
+import app
 from models import Database
 from models import get_chicago_time
+
 
 db = Database()
 

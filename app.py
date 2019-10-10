@@ -1,9 +1,6 @@
 from flask import Flask, render_template, Response, g
 from models import Database
-from graphs import get_graph_grid
 import geopandas as gpd
-import io
-from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 
 import json
 
@@ -18,6 +15,13 @@ from bokeh.layouts import column
 from bokeh.palettes import brewer
 
 app = Flask(__name__)
+
+if app.config["ENV"] == "LocalProd":
+    app.config.from_object("config.LocalProdConfig")
+elif app.config["ENV"] == "LocalTest":
+    app.config.from_object("config.LocalTestConfig")
+else:
+    app.config.from_object("config.AWSProdConfig")
 
 db = Database()
 
@@ -99,8 +103,7 @@ def map(candidate):
 
     max_sent, min_sent = db.get_scaled_sent()
 
-    #shapefile = 'static/shapefiles/USshapefile/USshapefile.shp'
-    shapefile = '/var/www/2020hopefuls/static/shapefiles/USshapefile/USshapefile.shp'
+    shapefile = app.config["PATH"]
     gdf = gpd.read_file(shapefile)
     df_states = db.get_states()
     gdf = gdf.merge(df_states, left_on='NAME', right_on='state')

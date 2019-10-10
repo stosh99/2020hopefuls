@@ -3,21 +3,15 @@ import sqlalchemy
 from datetime import datetime as dt
 import datetime
 import pytz
+import app
 
 
 class Database:
     def __init__(self):
-        #self.engine = sqlalchemy.create_engine('mysql+mysqlconnector://demouser:Anna0723$@127.0.0.1/tweets')
-        self.SQLALCHEMY_DATABASE_URI = "mysql+mysqlconnector://{username}:{password}@{hostname}/{databasename}".format(
-            username="admin",
-            password="admin999",
-            hostname="bu2019.cgh9oe6xgzbv.us-east-1.rds.amazonaws.com",
-            databasename="2020hopefuls",
-        )
-        self.engine = sqlalchemy.create_engine(self.SQLALCHEMY_DATABASE_URI)
+        self.engine = sqlalchemy.create_engine(app.app.config["SQLALCHEMY_DATABASE_URI"])
 
     def get_data(self):
-        qry = 'SELECT * FROM tweets WHERE updated = 0 LIMIT 5000'
+        qry = 'SELECT * FROM tweets WHERE updated = 0'
         con = self.engine.connect()
         vals = con.execute(qry)
         df = pd.DataFrame(vals.fetchall())

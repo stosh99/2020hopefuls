@@ -11,11 +11,13 @@ import pytz
 import queue
 import threading
 from textblob import TextBlob
+from app import app as app
 
-ACCESS_TOKEN = "1628411605-V9MhTFQBUjDfHDpPiggFjNvvKPCk5DLfIEYARXz"
-ACCESS_TOKEN_SECRET = "u9fBDP1lyptx2mfmZUK4uaqzrC6PlwGNQtdQFszLdXGu0"
-CONSUMER_KEY = "TTdP7HewA3BiKAE6U6bm1cAGH"
-CONSUMER_SECRET = "tQItnZCrM4WF2F8gltstM6QWgBRT4epa9UHgRkQO57iZqGwsvy"
+
+ACCESS_TOKEN = app.config["ACCESS_TOKEN"]
+ACCESS_TOKEN_SECRET = app.config["ACCESS_TOKEN_SECRET"]
+CONSUMER_KEY = app.config["CONSUMER_KEY"]
+CONSUMER_SECRET = app.config["CONSUMER_SECRET"]
 
 auth = OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
 auth.set_access_token(ACCESS_TOKEN, ACCESS_TOKEN_SECRET)
@@ -24,15 +26,7 @@ api = API(auth, wait_on_rate_limit=True,
 
 df_states = pd.read_csv('static/states.csv')
 
-SQLALCHEMY_DATABASE_URI = "mysql+mysqlconnector://{username}:{password}@{hostname}/{databasename}".format(
-            username="admin",
-            password="admin999",
-            hostname="bu2019.cgh9oe6xgzbv.us-east-1.rds.amazonaws.com",
-            databasename="2020hopefuls",
-        )
-
-#engine = sqlalchemy.create_engine('mysql+mysqlconnector://demouser:Anna0723$@127.0.0.1/tweets')
-engine = sqlalchemy.create_engine(SQLALCHEMY_DATABASE_URI)
+engine = sqlalchemy.create_engine(app.config["SQLALCHEMY_DATABASE_URI"])
 
 
 def tweet_processing_thread():
@@ -328,7 +322,6 @@ twitterStream.filter(languages=['en'], track=["Biden", "Bennet", "Buttigieg", "M
                                               "Williamson", "Yang", "Warren", "Beto", "O'Rourke", "Cory", "Booker",
                                               "Klobuchar", "Inslee", "Tulsi", "Gabbard", "Delaney", "Castro", "Ryan",
                                               "Blasio", "Castro"])
-
 
 
 
