@@ -1,6 +1,7 @@
 from flask import Flask, render_template, Response, g
 from models import Database
 import geopandas as gpd
+import datetime as dt
 
 import json
 
@@ -43,6 +44,7 @@ def index():
 
     source = ColumnDataSource(df)
     p = figure(plot_height=600, plot_width=800, x_range=xdr, y_range=ydr, toolbar_location=None)
+    #p = figure(sizing_mode="scale_both", x_range=xdr, y_range=ydr, toolbar_location=None)
     p.circle(x="user_count", y="avg_sent", size=50, source=source, alpha=.05)
     image = ImageURL(url="jpeg", x="user_count", y="avg_sent", w=None, h=None, anchor="center", global_alpha=.75)
     p.add_glyph(source, image)
@@ -52,6 +54,8 @@ def index():
             ("Sentiment", "@avg_sent"),
             ("#Tweeters", "@user_count"),
         ]))
+    p.toolbar.active_drag = None
+    p.sizing_mode = 'scale_width'
 
     xaxis = LinearAxis()
     p.xaxis.fixed_location = 0
@@ -100,18 +104,21 @@ def map(candidate):
     else:
         candidate = candidate
     cands = db.get_candidates()
-
+    print('before sent  ', dt.datetime.now())
     max_sent, min_sent = db.get_scaled_sent()
+    print('after sent  ', dt.datetime.now())
 
     shapefile = app.config["PATH"]
     gdf = gpd.read_file(shapefile)
     df_states = db.get_states()
+    print('before cand  ', dt.datetime.now())
     gdf = gdf.merge(df_states, left_on='NAME', right_on='state')
     gdf_us = gdf[['abbr', 'state', 'geometry']].copy()
     gdf_us.columns = ['abbr', 'name', 'geometry']
     gdf_us = gdf_us[~gdf_us['abbr'].isin(['AK', 'AS', 'GU', 'HI', 'MP', 'PR', 'VI'])]
 
     last_update, tweets, df = db.get_candidate_data(candidate, 0)
+    print('get candidate data  ', dt.datetime.now())
     df['sent'] = round(df['sent'] * 1, 2)
     merged = gdf_us.merge(df, how='left', left_on='abbr', right_on='state')
     merged = merged[merged['user_count'] > 0].copy()

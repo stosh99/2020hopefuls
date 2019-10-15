@@ -51,9 +51,10 @@ class Database:
         return last_update, plt_df
 
     def get_candidate_data_cur(self, candidate, sent_limit):
-        qry = "SELECT * FROM tweets WHERE updated=1 and DAY(dt) = (SELECT MAX(DAY(dt)) FROM tweets)"
+        today = dt.strftime(dt.now(), '%Y-%m-%d')
+        qry = "SELECT * FROM tweets WHERE updated=1 and dt >= %s"
         con = self.engine.connect()
-        vals = con.execute(qry)
+        vals = con.execute(qry, today)
         df_cand = pd.DataFrame(vals.fetchall())
         df_cand.columns = vals.keys()
         candidates = pd.read_sql('candidates', con=con)['candidate']
@@ -70,13 +71,14 @@ class Database:
         return last_update, tweets, plt_df
 
     def get_candidate_data(self, candidate, sent_limit):
+        today = dt.strftime(dt.now(), '%Y-%m-%d')
         if candidate == 'All':
-            qry = "SELECT * FROM tweets WHERE DATE(dt) = (SELECT MAX(DATE(dt)) FROM tweets)"
+            qry = "SELECT * FROM tweets WHERE dt >= %s"
         else:
-            qry = "SELECT * FROM tweets WHERE DATE(dt) = (SELECT MAX(DAtE(dt)) FROM tweets)" \
+            qry = "SELECT * FROM tweets WHERE dt >= %s" \
                   + " and " + candidate + "=1"
         con = self.engine.connect()
-        vals = con.execute(qry)
+        vals = con.execute(qry, today)
         df_cand = pd.DataFrame(vals.fetchall())
         df_cand.columns = vals.keys()
         con.close()
@@ -108,19 +110,21 @@ class Database:
         return list(df_cand.itertuples(index=False))
 
     def get_scaled_sent(self):
+        today = dt.strftime(dt.now(), '%Y-%m-%d')
         qry = "SELECT MAX(sent)as max_sent, MIN(sent) as min_sent " \
-              "FROM tweets WHERE updated=1 and DATE(dt) = (SELECT MAX(DATE(dt)) FROM tweets)"
+              "FROM tweets WHERE dt >= %s"
         con = self.engine.connect()
-        vals = con.execute(qry).fetchone()
+        vals = con.execute(qry, today).fetchone()
         return vals[0], vals[1]
 
     def get_grid_data(self):
         candidates = self.get_candidates()
         grid_list = []
+        today = dt.strftime(dt.now(), '%Y-%m-%d')
 
-        qry = "SELECT * FROM tweets WHERE updated=1 and DATE(dt) = (SELECT MAX(DATE(dt)) FROM tweets)"#" AND state != 'unk'"
+        qry = "SELECT * FROM tweets WHERE updated=1 and dt >= %s"#" AND state != 'unk'"
         con = self.engine.connect()
-        vals = con.execute(qry)
+        vals = con.execute(qry, today)
         con.close()
         df = pd.DataFrame(vals.fetchall())
         df.columns = vals.keys()
@@ -141,9 +145,10 @@ class Database:
         return
 
     def get_grid_data_db(self):
-        qry = "SELECT * FROM grid_data WHERE dt = (SELECT MAX(dt) FROM grid_data)"
+        today = dt.strftime(dt.now(), '%Y-%m-%d')
+        qry = "SELECT * FROM grid_data WHERE dt >= %s"
         con = self.engine.connect()
-        vals = con.execute(qry)
+        vals = con.execute(qry, today)
         con.close()
         df = pd.DataFrame(vals.fetchall())
         df.columns = vals.keys()
