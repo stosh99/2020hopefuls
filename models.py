@@ -145,10 +145,9 @@ class Database:
         return
 
     def get_grid_data_db(self):
-        today = dt.strftime(dt.now(), '%Y-%m-%d')
-        qry = "SELECT * FROM grid_data WHERE dt >= %s"
+        qry = "SELECT * FROM grid_data WHERE dt = (select max(dt) from grid_data)"
         con = self.engine.connect()
-        vals = con.execute(qry, today)
+        vals = con.execute(qry)
         con.close()
         df = pd.DataFrame(vals.fetchall())
         df.columns = vals.keys()
