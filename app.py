@@ -104,21 +104,17 @@ def map(candidate):
     else:
         candidate = candidate
     cands = db.get_candidates()
-    print('before sent  ', dt.datetime.now())
     max_sent, min_sent = db.get_scaled_sent()
-    print('after sent  ', dt.datetime.now())
 
     shapefile = app.config["PATH"]
     gdf = gpd.read_file(shapefile)
     df_states = db.get_states()
-    print('before cand  ', dt.datetime.now())
     gdf = gdf.merge(df_states, left_on='NAME', right_on='state')
     gdf_us = gdf[['abbr', 'state', 'geometry']].copy()
     gdf_us.columns = ['abbr', 'name', 'geometry']
     gdf_us = gdf_us[~gdf_us['abbr'].isin(['AK', 'AS', 'GU', 'HI', 'MP', 'PR', 'VI'])]
 
     last_update, tweets, df = db.get_candidate_data(candidate, 0)
-    print('get candidate data  ', dt.datetime.now())
     df['sent'] = round(df['sent'] * 1, 2)
     merged = gdf_us.merge(df, how='left', left_on='abbr', right_on='state')
     merged = merged[merged['user_count'] > 0].copy()
