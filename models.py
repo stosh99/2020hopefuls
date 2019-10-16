@@ -124,7 +124,9 @@ class Database:
 
         qry = "SELECT * FROM tweets WHERE updated=1 and dt >= %s"#" AND state != 'unk'"
         con = self.engine.connect()
+        print('before', dt.now())
         vals = con.execute(qry, today)
+        print('after', dt.now())
         con.close()
         df = pd.DataFrame(vals.fetchall())
         df.columns = vals.keys()

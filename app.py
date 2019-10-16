@@ -164,6 +164,74 @@ def map(candidate):
     return encode_utf8(html)
 
 
+@app.route('/alaska/<candidate>')
+def alaska(candidate):
+    if candidate == '':
+        candidate = 'All'
+    else:
+        candidate = candidate
+    cands = db.get_candidates()
+    max_sent, min_sent = db.get_scaled_sent()
+
+    shapefile = app.config["PATH"]
+    gdf = gpd.read_file(shapefile)
+    df_states = db.get_states()
+    gdf = gdf.merge(df_states, left_on='NAME', right_on='state')
+    gdf_us = gdf[['abbr', 'state', 'geometry']].copy()
+    gdf_us.columns = ['abbr', 'name', 'geometry']
+    gdf_us = gdf_us[gdf_us['abbr'].isin(['AK'])]
+    print(gdf_us)
+
+    last_update, tweets, df = db.get_candidate_data(candidate, 0)
+    df['sent'] = round(df['sent'] * 1, 2)
+    merged = gdf_us.merge(df, how='left', left_on='abbr', right_on='state')
+    merged = merged[merged['user_count'] > 0].copy()
+
+    merged_json = json.loads(merged.to_json())
+    json_data = json.dumps(merged_json)
+
+    geosource = GeoJSONDataSource(geojson=json_data)
+    palette = brewer['RdBu'][8]
+    palette = palette[::-1]
+    bar_range = max(abs(max_sent), abs(min_sent))
+    color_mapper = LinearColorMapper(palette=palette, low=-bar_range, high=bar_range)
+
+    color_bar = ColorBar(color_mapper=color_mapper, label_standoff=8, width=20,
+                         border_line_color='black', location=(0, 0))
+    p = figure(title=None, plot_height=550, plot_width=1000, toolbar_location=None)
+    p.xgrid.grid_line_color = None
+    p.ygrid.grid_line_color = None
+    p.add_tools(HoverTool(
+        tooltips=[
+            ("State", "@name"),
+            ("#Tweeters", "@user_count"),
+            ("Sentiment", "@sent"),
+        ]))
+    p.axis.visible = False
+    p.add_layout(color_bar, 'right')
+
+    p.patches('xs', 'ys', source=geosource, fill_color={'field': 'sent', 'transform': color_mapper},
+              line_color='black', line_width=0.25, fill_alpha=.75)
+
+    js_resources = INLINE.render_js()
+    css_resources = INLINE.render_css()
+
+    layout = column(p)
+    script, div = components(layout)
+    html = render_template(
+        'map.html',
+        plot_script=script,
+        plot_div=div,
+        js_resources=js_resources,
+        css_resources=css_resources,
+        last_update=last_update,
+        tweets=tweets,
+        selected_cand=candidate,
+        cands=cands
+    )
+    return encode_utf8(html)
+
+
 @app.route('/grid', methods=['GET', 'POST'])
 def grid():
     df, last_update = db.get_grid_data_db()
