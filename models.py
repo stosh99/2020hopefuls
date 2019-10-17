@@ -20,6 +20,17 @@ class Database:
         con.close()
         return df
 
+    def get_tweets(self):
+        today = dt.strftime(dt.now(), '%Y-%m-%d')
+        qry = "SELECT * FROM tweets WHERE dt >= %s"
+        con = self.engine.connect()
+        vals = con.execute(qry, today)
+        df_tweets = pd.DataFrame(vals.fetchall())
+        df_tweets.columns = vals.keys()
+        df_states = pd.read_sql('states', con=con)['abbr']
+        con.close()
+        return df_states, df_tweets
+
     def update_tweets_db(self, row):
         qry = "UPDATE tweets " \
               "SET sent=%s, updated=%s, Bennet=%s, Biden=%s, Blasio=%s, Booker=%s, Buttigieg=%s, Castro=%s, Delaney=%s, " \
@@ -57,7 +68,6 @@ class Database:
         vals = con.execute(qry, today)
         df_cand = pd.DataFrame(vals.fetchall())
         df_cand.columns = vals.keys()
-        candidates = pd.read_sql('candidates', con=con)['candidate']
         states = pd.read_sql('states', con=con)['abbr']
         con.close()
         date_today = dt.strftime(get_chicago_time(), '%Y-%m-%d')
@@ -89,6 +99,7 @@ class Database:
         df_master = create_master(df_filter, candidate, date_today)
         plt_df = get_plot_df(df_master, candidate)
         plt_df = plt_df[plt_df['user_count'] > 0]
+        plt_df['sent'] = round(plt_df['sent'] * 1, 2)
         tweets = plt_df['user_count'].sum()
         return last_update, tweets, plt_df
 
@@ -107,7 +118,18 @@ class Database:
         vals = con.execute(qry, cur_date)
         df_cand = pd.DataFrame(vals.fetchall())
         df_cand.columns = vals.keys()
+        con.close()
         return list(df_cand.itertuples(index=False))
+
+    def get_candidates_df(self):
+        cur_date = dt.strftime(dt.now(), '%YYYY-%m-%d')
+        qry = "SELECT * FROM candidates WHERE exit_dt > %s"
+        con = self.engine.connect()
+        vals = con.execute(qry, cur_date)
+        df_cand = pd.DataFrame(vals.fetchall())
+        df_cand.columns = vals.keys()
+        con.close()
+        return df_cand
 
     def get_scaled_sent(self):
         today = dt.strftime(dt.now(), '%Y-%m-%d')

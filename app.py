@@ -115,7 +115,7 @@ def map(candidate):
     gdf_us = gdf_us[~gdf_us['abbr'].isin(['AK', 'AS', 'GU', 'HI', 'MP', 'PR', 'VI'])]
 
     last_update, tweets, df = db.get_candidate_data(candidate, 0)
-    df['sent'] = round(df['sent'] * 1, 2)
+
     merged = gdf_us.merge(df, how='left', left_on='abbr', right_on='state')
     merged = merged[merged['user_count'] > 0].copy()
 

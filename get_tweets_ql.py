@@ -309,17 +309,16 @@ class listener(StreamListener):
                 save_this += ',' + ''
 
             self.lst_tweets.append(insert_dict)
-            if len(self.lst_tweets) >= 200:
+            if len(self.lst_tweets) >= 500:
                 tweet_queue.put(self.lst_tweets)
                 print('tweet df put to queue  ', len(self.lst_tweets), ' tweets ', dt.datetime.now())
                 self.lst_tweets = []
-
         except:
             pass
         return True
 
     def on_timeout(self):
-        print ('Timeout...')
+        print('Timeout...')
         return True  # Don't kill the stream
         print
         "Stream restarted"
