@@ -18,7 +18,7 @@ matplotlib==3.0.3
 munch==2.3.2
 mysql-connector-python==8.0.17
 nltk==3.4.5
-numpy==1.17.2
+numpy==1.22.0
 oauthlib==3.1.0
 packaging==19.2
 pandas==0.24.2
